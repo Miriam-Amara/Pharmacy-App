@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: pharmacy_app/backend
+        working-directory: backend
 
     env:
       ENV: ${{ secrets.ENV }}
