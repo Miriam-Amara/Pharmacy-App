@@ -19,6 +19,7 @@ from api.v1.views import app_views
 from models import storage
 
 
+load_dotenv()
 logger = logging.getLogger(__name__)
 bcrypt = Bcrypt()
 auth = SessionDBAuth()
@@ -74,17 +75,12 @@ def create_app(config_name: str | None=None) -> Flask:
     return app
 
 
+config_name = os.getenv("ENV", "development")
+app = create_app(config_name)
+
 if __name__ == "__main__":
-    load_dotenv()
-
-    config_name = os.getenv("ENV")
-    if not config_name:
-        logger.error("ENV environment variable not set")
-        abort(500)
-
     host = os.getenv("PHARMACY_API_HOST", "0.0.0.0")
     port = int(os.getenv("PHARMACY_API_PORT", 5000))
     debug_mode = bool(os.getenv("DEBUG_MODE", False))
-    app = create_app(config_name)
     app.run(host=host, port=port, threaded=True, debug=debug_mode)
     
