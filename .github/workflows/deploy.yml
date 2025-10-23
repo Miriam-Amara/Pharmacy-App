@@ -88,11 +88,29 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.DO_SSH_KEY }}
 
-      - name: Deploy with SSH
+      - name: Deploy to Droplet
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'EOF'
-            cd ~/pharmacy_app
-            git pull origin main         # update latest code
-            docker compose build         # build backend/frontend images on droplet
-            docker compose up -d         # start containers in production
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DO_HOST }} << 'EOF'
+          echo "Pulling latest code..."
+          cd /root/pharmacy_app
+          git pull origin main
+
+          echo "Checking Docker service status..."
+          if ! systemctl is-active --quiet docker; then
+            echo "Docker is not running. Attempting to start..."
+            systemctl start docker
+          fi
+
+          echo "Docker service status:"
+          systemctl status docker --no-pager | head -n 10
+
+          echo "Testing Docker daemon access..."
+          if ! docker ps > /dev/null 2>&1; then
+            echo "ERROR: Docker daemon is still unreachable. Aborting deployment."
+            exit 1
+          fi
+
+          echo "Bringing up containers..."
+          docker compose down
+          docker compose up -d --build
           EOF
