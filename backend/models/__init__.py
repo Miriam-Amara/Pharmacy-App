@@ -88,7 +88,7 @@ def setup_developement_database() -> str:
     """
     dev_database_user = os.getenv("DEV_DATABASE_USER")
     dev_database_password = os.getenv("DEV_DATABASE_PASSWORD")
-    deve_database_name = os.getenv("DEV_DATABASE_NAME")
+    dev_database_name = os.getenv("DEV_DATABASE_NAME")
     dev_database_host = os.getenv("DEV_DATABASE_HOST", "localhost")
     dev_database_port = os.getenv("DEV_DATABASE_PORT", "5432")
 
@@ -100,7 +100,7 @@ def setup_developement_database() -> str:
         raise ValueError(
             "No environment variable for test database password."
         )
-    if not deve_database_name:
+    if not dev_database_name:
         raise ValueError(
             "No environment variable for test database name."
         )
@@ -115,12 +115,12 @@ def setup_developement_database() -> str:
 
     dev_database_url = (
         f"postgresql+psycopg2://{dev_database_user}:{dev_database_password}"
-        f"@{dev_database_host}:{dev_database_port}/{deve_database_name}"
+        f"@{dev_database_host}:{dev_database_port}/{dev_database_name}"
     )
     return dev_database_url
 
 
-if os.getenv("ENV") == "dev":
+if os.getenv("ENV") == "development":
     database_url = setup_developement_database()
 elif os.getenv("ENV") == "test":
     database_url = setup_test_database()
