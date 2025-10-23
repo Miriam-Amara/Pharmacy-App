@@ -83,12 +83,10 @@ jobs:
             echo "Waiting for Postgres..."
             if [ $elapsed -ge $timeout ]; then
               echo "Postgres did not start in time"
+              docker logs ${{ job.services.postgres.id }} || true
               exit 1
             fi
           done
-      - name: Debug Postgres
-        run: docker logs ${{ job.services.postgres.id }}
-
 
       - name: Run Tests
         run: |
