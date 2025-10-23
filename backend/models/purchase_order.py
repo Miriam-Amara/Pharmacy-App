@@ -11,7 +11,7 @@ import enum
 from models.basemodel import Base, BaseModel
 
 
-class Status(enum.Enum):
+class OrderStatus(enum.Enum):
     """Represents the current stage of a purchase order."""
 
     pending = "pending"
@@ -25,7 +25,7 @@ class PurchaseOrder(BaseModel, Base):
 
     __tablename__ = "purchase_orders"
 
-    status = mapped_column(Enum(Status), default="pending")
+    status = mapped_column(Enum(OrderStatus), default="pending")
     brand_id = mapped_column(
         String(36),
         ForeignKey("brands.id", ondelete="SET NULL"),
