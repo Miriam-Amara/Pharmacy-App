@@ -40,7 +40,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:latest
         env:
           POSTGRES_USER: ${{ secrets.TEST_DATABASE_USER }}
           POSTGRES_PASSWORD: ${{ secrets.TEST_DATABASE_PASSWORD }}
@@ -48,7 +48,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U ${{ secrets.TEST_DATABASE_USER }}"
+          --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -72,11 +72,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Connect to PostgreSQL
+        run: |
+          # Use created user and password to connect
+          psql -h localhost -U {{ secrets.TEST_DATABASE_USER }} -d {{ secrets.TEST_DATABASE_NAME }} -c "SELECT 1;"
+
       - name: Wait for Postgres to be ready (timeout 30s)
         run: |
           timeout=30
           elapsed=0
-          until pg_isready -h postgres -p 5432 -U ${{ secrets.TEST_DATABASE_USER }}; do
+          until pg_isready; do
             echo "Waiting for Postgres..."
             sleep 2
             elapsed=$((elapsed + 2))
@@ -88,14 +93,6 @@ jobs:
               exit 1
             fi
           done
-      - name: Create missing role
-        env:
-          DB_USER: ${{ secrets.TEST_DATABASE_USER }}
-          DB_PASSWORD: ${{ secrets.TEST_DATABASE_PASSWORD }}
-        run: |
-          docker exec ${{ job.services.postgres.id }} \
-            psql -U postgres -c "CREATE ROLE $DB_USER LOGIN PASSWORD '$DB_PASSWORD';"
-
 
       - name: Run Tests
         run: |
