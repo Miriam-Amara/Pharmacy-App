@@ -89,6 +89,12 @@ jobs:
             fi
           done
 
+      - name: Create missing role
+        run: |
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U postgres -c "CREATE ROLE ${{ secrets.TEST_DATABASE_USER }} LOGIN PASSWORD '${{ secrets.TEST_DATABASE_PASSWORD }}';"
+
+
       - name: Run Tests
         run: |
           pytest -v --disable-warnings
