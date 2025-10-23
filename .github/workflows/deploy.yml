@@ -82,7 +82,8 @@ jobs:
             elapsed=$((elapsed + 2))
             echo "Waiting for Postgres..."
             if [ $elapsed -ge $timeout ]; then
-              echo "Postgres did not start in time"
+              echo "::error::Postgres did not start in time"
+              echo "=== Postgres logs ==="
               docker logs ${{ job.services.postgres.id }} || true
               exit 1
             fi
