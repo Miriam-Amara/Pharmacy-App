@@ -75,7 +75,8 @@ jobs:
       - name: Connect to PostgreSQL
         run: |
           # Use created user and password to connect
-          psql -h localhost -U {{ secrets.TEST_DATABASE_USER }} -d {{ secrets.TEST_DATABASE_NAME }} -c "SELECT 1;"
+          export PGPASSWORD=$TEST_DATABASE_PASSWORD
+          psql -h localhost -U $TEST_DATABASE_USER -d $TEST_DATABASE_NAME -c "SELECT 1;"
 
       - name: Wait for Postgres to be ready (timeout 30s)
         run: |
