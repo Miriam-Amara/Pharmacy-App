@@ -24,12 +24,11 @@ jobs:
 
     env:
       ENV: ${{ secrets.ENV }}
-      DEBUG_MODE: ${{ secrets.DEBUG_MODE }}
-      TEST_DATABASE_USER: ${{ secrets.TEST_DATABASE_USER }}
-      TEST_DATABASE_PASSWORD: ${{ secrets.TEST_DATABASE_PASSWORD }}
-      TEST_DATABASE_NAME: ${{ secrets.TEST_DATABASE_NAME }}
-      TEST_DATABASE_HOST: ${{ secrets.TEST_DATABASE_HOST }}
-      TEST_DATABASE_PORT: ${{ secrets.TEST_DATABASE_PORT }}
+      TEST_DATABASE_USER: pharmacy
+      TEST_DATABASE_PASSWORD: finalyear
+      TEST_DATABASE_NAME: pharmacy_test_db
+      TEST_DATABASE_HOST: localhost
+      TEST_DATABASE_PORT: 5432
       PHARMACY_API_HOST: ${{ secrets.PHARMACY_API_HOST }}
       PHARMACY_API_PORT: ${{ secrets.PHARMACY_API_PORT }}
       SESSION_NAME: ${{ secrets.SESSION_NAME }}
@@ -42,9 +41,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: ${{ secrets.TEST_DATABASE_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.TEST_DATABASE_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.TEST_DATABASE_NAME }}
+          POSTGRES_USER: pharmacy
+          POSTGRES_PASSWORD: finalyear
+          POSTGRES_DB: pharmacy_test_db
         ports:
           - 5432:5432
         options: >-
@@ -62,11 +61,6 @@ jobs:
         with:
           python-version: "3.10"
       
-      - name: Debug secrets
-        run: |
-          echo "DB user=${{ secrets.TEST_DATABASE_USER }}"
-          echo "DB name=${{ secrets.TEST_DATABASE_NAME }}"
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -75,8 +69,9 @@ jobs:
       - name: Connect to PostgreSQL
         run: |
           # Use created user and password to connect
-          export PGPASSWORD=$TEST_DATABASE_PASSWORD
-          psql -h localhost -U $TEST_DATABASE_USER -d $TEST_DATABASE_NAME -c "SELECT 1;"
+          psql -h localhost -U pharmacy -d pharmacy_test_db -c "SELECT 1;"
+          env:
+            PGPASSWORD=finalyear
 
       - name: Wait for Postgres to be ready (timeout 30s)
         run: |
