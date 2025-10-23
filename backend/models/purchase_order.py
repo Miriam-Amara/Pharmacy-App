@@ -25,7 +25,10 @@ class PurchaseOrder(BaseModel, Base):
 
     __tablename__ = "purchase_orders"
 
-    status = mapped_column(Enum(OrderStatus), default="pending")
+    status = mapped_column(
+        Enum(OrderStatus, name="orderstatus", create_type=False),
+        default="pending"
+    )
     brand_id = mapped_column(
         String(36),
         ForeignKey("brands.id", ondelete="SET NULL"),

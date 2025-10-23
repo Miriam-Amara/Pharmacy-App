@@ -43,8 +43,14 @@ class PurchaseOrderItem(BaseModel, Base):
     quantity = mapped_column(Integer, default=0)
     unit_cost_price = mapped_column(Float, default=0)
     total_cost_price = mapped_column(Float, default=0)
-    payment_status = mapped_column(Enum(PaymentStatus), nullable=False)
-    item_status = mapped_column(Enum(ItemStatus), default="pending")
+    payment_status = mapped_column(
+        Enum(PaymentStatus, name="paymentstatus", create_type=False),
+        nullable=False
+    )
+    item_status = mapped_column(
+        Enum(ItemStatus, name="itemstatus", create_type=False),
+        default="pending"
+    )
     purchase_order = relationship(
         "PurchaseOrder", back_populates="purchase_order_items"
     )
