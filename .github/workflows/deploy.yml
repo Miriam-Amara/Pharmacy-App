@@ -26,7 +26,7 @@ jobs:
       ENV: ${{ secrets.ENV }}
       TEST_DATABASE_USER: pharmacy
       TEST_DATABASE_PASSWORD: finalyear
-      TEST_DATABASE_NAME: pharmacy_test_db
+      TEST_DATABASE_NAME: pharmacy
       TEST_DATABASE_HOST: postgres
       TEST_DATABASE_PORT: 5432
       PHARMACY_API_HOST: ${{ secrets.PHARMACY_API_HOST }}
@@ -43,7 +43,7 @@ jobs:
         env:
           POSTGRES_USER: pharmacy
           POSTGRES_PASSWORD: finalyear
-          POSTGRES_DB: pharmacy_test_db
+          POSTGRES_DB: pharmacy
         ports:
           - 5432:5432
         options: >-
@@ -87,7 +87,7 @@ jobs:
         run: |
           # Use created user and password to connect
           export PGPASSWORD=finalyear
-          psql -h postgres -U pharmacy -d pharmacy_test_db -c "SELECT 1;"
+          psql -h postgres -U pharmacy -d pharmacy -c "SELECT 1;"
 
       - name: Run Tests
         run: |
