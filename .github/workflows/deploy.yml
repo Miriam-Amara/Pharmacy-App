@@ -69,9 +69,8 @@ jobs:
       - name: Connect to PostgreSQL
         run: |
           # Use created user and password to connect
+          export PGPASSWORD=finalyear
           psql -h localhost -U pharmacy -d pharmacy_test_db -c "SELECT 1;"
-          env:
-            PGPASSWORD=finalyear
 
       - name: Wait for Postgres to be ready (timeout 30s)
         run: |
