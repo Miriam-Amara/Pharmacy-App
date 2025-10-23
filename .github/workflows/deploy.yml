@@ -88,11 +88,13 @@ jobs:
               exit 1
             fi
           done
-
       - name: Create missing role
+        env:
+          DB_USER: ${{ secrets.TEST_DATABASE_USER }}
+          DB_PASSWORD: ${{ secrets.TEST_DATABASE_PASSWORD }}
         run: |
           docker exec ${{ job.services.postgres.id }} \
-            psql -U postgres -c "CREATE ROLE ${{ secrets.TEST_DATABASE_USER }} LOGIN PASSWORD '${{ secrets.TEST_DATABASE_PASSWORD }}';"
+            psql -U postgres -c "CREATE ROLE $DB_USER LOGIN PASSWORD '$DB_PASSWORD';"
 
 
       - name: Run Tests
