@@ -58,7 +58,7 @@ def setup_logging() -> None:
     """Setup logging configurations"""
     os.makedirs("logs", exist_ok=True)
 
-    debug_mode = os.getenv("DEBUG_MODE")
+    debug_mode = os.getenv("DEBUG_MODE", "False")
     if not debug_mode:
         raise ValueError("No environment variable for debug mode.")
     
