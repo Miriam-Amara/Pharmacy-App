@@ -37,7 +37,6 @@ jobs:
       DO_HOST: ${{ secrets.DO_HOST }}
       DO_USER: ${{ secrets.DO_USER }}
       DO_SSH_KEY: ${{ secrets.DO_SSH_KEY }}
-      APP_DIR: ${{ secrets.APP_DIR }}
 
     services:
       postgres:
@@ -100,7 +99,6 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build and Start Services
-        working-directory: pharmacy_app   # location of docker-compose.yml
         run: |
           # Build images defined in docker-compose.yml
           docker-compose build
@@ -112,7 +110,6 @@ jobs:
           docker ps
 
       - name: Stop and Remove Containers (Cleanup)
-        working-directory: pharmacy_app
         run: |
           docker-compose down
 
