@@ -66,9 +66,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Wait for Postgres to be ready (timeout 30s)
+      - name: Wait for Postgres to be ready (timeout 90s)
         run: |
-          timeout=30
+          timeout=90
           elapsed=0
           until pg_isready -h postgres -U postgres; do
             echo "Waiting for Postgres..."
