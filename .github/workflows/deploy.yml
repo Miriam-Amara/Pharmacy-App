@@ -21,7 +21,7 @@ jobs:
 
     env:
       working-directory: backend
-      ENV: ${{ secrets.ENV }}
+      ENV: test
       TEST_DATABASE_USER: postgres
       TEST_DATABASE_PASSWORD: finalyear
       TEST_DATABASE_NAME: pharmacy
