@@ -89,17 +89,17 @@ jobs:
       - name: Build and Start Services
         run: |
           # Build images defined in docker-compose.yml
-          docker-compose build
+          docker compose build
           
           # Start containers in detached mode
-          docker-compose up -d
+          docker compose up -d
           
           # List running containers for verification
           docker ps
 
       - name: Stop and Remove Containers (Cleanup)
         run: |
-          docker-compose down
+          docker compose down
 
 
   # --------------------
