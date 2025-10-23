@@ -16,7 +16,7 @@ def setup_production_database() -> str:
     """
     database_user = os.getenv("POSTGRES_USER")
     database_password = os.getenv("POSTGRES_PASSWORD")
-    database_name = os.getenv("POSTGRES_NAME")
+    database_name = os.getenv("POSTGRES_DB")
     database_host = os.getenv("POSTGRES_HOST")
     database_port = os.getenv("POSTGRES_PORT")
 
