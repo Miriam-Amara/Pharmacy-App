@@ -93,6 +93,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'EOF'
             cd ~/pharmacy_app
             git pull origin main         # update latest code
-            docker-compose build         # build backend/frontend images on droplet
-            docker-compose up -d         # start containers in production
+            docker compose build         # build backend/frontend images on droplet
+            docker compose up -d         # start containers in production
           EOF
