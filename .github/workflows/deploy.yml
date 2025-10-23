@@ -24,7 +24,7 @@ jobs:
 
     env:
       ENV: ${{ secrets.ENV }}
-      TEST_DATABASE_USER: pharmacy
+      TEST_DATABASE_USER: postgres
       TEST_DATABASE_PASSWORD: finalyear
       TEST_DATABASE_NAME: pharmacy
       TEST_DATABASE_HOST: postgres
@@ -41,13 +41,13 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: pharmacy
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: finalyear
           POSTGRES_DB: pharmacy
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U pharmacy"
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -70,7 +70,7 @@ jobs:
         run: |
           timeout=30
           elapsed=0
-          until pg_isready -h postgres -U pharmacy; do
+          until pg_isready -h postgres -U postgres; do
             echo "Waiting for Postgres..."
             sleep 2
             elapsed=$((elapsed + 2))
@@ -87,7 +87,7 @@ jobs:
         run: |
           # Use created user and password to connect
           export PGPASSWORD=finalyear
-          psql -h postgres -U pharmacy -d pharmacy -c "SELECT 1;"
+          psql -h postgres -U postgres -d pharmacy -c "SELECT 1;"
 
       - name: Run Tests
         run: |
