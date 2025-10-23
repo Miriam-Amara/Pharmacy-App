@@ -68,7 +68,8 @@ jobs:
       - name: Run Tests
         working-directory: backend
         run: |
-          pytest -v --disable-warnings
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest tests/ -v --disable-warnings
 
   # --------------------
   # 2) BUILD (runs after test)
