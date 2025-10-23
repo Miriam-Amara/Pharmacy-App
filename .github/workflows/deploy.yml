@@ -47,7 +47,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U pharmacy"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -70,13 +70,13 @@ jobs:
         run: |
           # Use created user and password to connect
           export PGPASSWORD=finalyear
-          psql -h localhost -U pharmacy -d pharmacy_test_db -c "SELECT 1;"
+          psql -h postgres -U pharmacy -d pharmacy_test_db -c "SELECT 1;"
 
       - name: Wait for Postgres to be ready (timeout 30s)
         run: |
           timeout=30
           elapsed=0
-          until pg_isready; do
+          until pg_isready -h postgres -U pharmacy; do
             echo "Waiting for Postgres..."
             sleep 2
             elapsed=$((elapsed + 2))
