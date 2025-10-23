@@ -27,7 +27,7 @@ jobs:
       TEST_DATABASE_USER: pharmacy
       TEST_DATABASE_PASSWORD: finalyear
       TEST_DATABASE_NAME: pharmacy_test_db
-      TEST_DATABASE_HOST: localhost
+      TEST_DATABASE_HOST: postgres
       TEST_DATABASE_PORT: 5432
       PHARMACY_API_HOST: ${{ secrets.PHARMACY_API_HOST }}
       PHARMACY_API_PORT: ${{ secrets.PHARMACY_API_PORT }}
