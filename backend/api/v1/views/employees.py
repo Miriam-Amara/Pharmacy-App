@@ -23,6 +23,7 @@ from models.employee import Employee
 
 logger = logging.getLogger(__name__)
 
+
 @app_views.route("/register", strict_slashes=False, methods=["POST"])
 def register_employee():
     """
@@ -30,7 +31,7 @@ def register_employee():
     """
     from api.v1.app import bcrypt
     valid_data = validate_request_data(EmployeeRegister)
-    
+
     check_email_username_exists(valid_data)
 
     valid_data["password"] = bcrypt.generate_password_hash(  # type: ignore

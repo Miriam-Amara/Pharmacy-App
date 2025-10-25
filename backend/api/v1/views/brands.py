@@ -22,6 +22,7 @@ from models.brand import Brand
 
 logger = logging.getLogger(__name__)
 
+
 def get_brand_dict(brand: Brand) -> dict[str, Any]:
     """
     Converts a Brand object to a dictionary excluding related fields.

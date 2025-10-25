@@ -28,13 +28,14 @@ def check_email_username_exists(data: dict[str, Any]) -> None:
         )
         if employee:
             abort(409, description="Email already exist.")
-    
+
     if "username" in data:
         employee = Employee.search_employee_by_email_username(
             data["username"]
         )
         if employee:
             abort(409, description="Username already exists.")
+
 
 def get_obj(cls: Type[T], id: str) -> T | None:
     """

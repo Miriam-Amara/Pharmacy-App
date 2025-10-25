@@ -22,12 +22,13 @@ from models.category import Category
 
 logger = logging.getLogger(__name__)
 
+
 def get_category_dict(category: Category) -> dict[str, Any]:
     """
     Converts a Category object to a dictionary
     excluding related fields.
     """
-    
+
     category_dict = category.to_dict()
     category_dict["added_by"] = getattr(category.added_by, "username", None)
 

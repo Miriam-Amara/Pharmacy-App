@@ -45,7 +45,7 @@ def add_purchase_item(purchase_order_id: str):
     Add a new purchase order item.
     """
     valid_data = validate_request_data(PurchaseOrderItemRegister)
-    
+
     product = get_obj(Product, valid_data["product_id"])
     if not product:
         abort(404, description="Product does not exist.")
@@ -65,7 +65,9 @@ def add_purchase_item(purchase_order_id: str):
 
 
 @app_views.route(
-    "/purchases/<int:page_size>/<int:page_num>", strict_slashes=False, methods=["GET"]
+    "/purchases/<int:page_size>/<int:page_num>",
+    strict_slashes=False,
+    methods=["GET"]
 )
 @admin_only
 def get_all_purchases(page_size: int, page_num: int):

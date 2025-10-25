@@ -23,12 +23,13 @@ from models.category import Category
 
 logger = logging.getLogger(__name__)
 
+
 def get_product_dict(product: Product) -> dict[str, Any]:
     """
     Return product data excluding relations.
     """
     product_dict = product.to_dict()
-    product_dict["category"] =  getattr(product.category, "name", None)
+    product_dict["category"] = getattr(product.category, "name", None)
     product_dict["added_by"] = getattr(
         product.added_by, "username", None
     )
@@ -117,13 +118,13 @@ def update_product(product_id: str):
     product = get_obj(Product, product_id)
     if not product:
         abort(404, description="Product does not exist")
-    
+
     if "category_id" in valid_data:
         category = get_obj(Category, valid_data["category_id"])
         if not category:
             abort(404, description="Category does not exist.")
         valid_data["category"] = category
-    
+
     for attr, value in valid_data.items():
         setattr(product, attr, value)
 

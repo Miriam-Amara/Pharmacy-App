@@ -27,6 +27,7 @@ def all_brand_products(brand: Brand) -> dict[str, Any]:
     }
     return brand_products
 
+
 def all_product_brands(product: Product) -> dict[str, Any]:
     """
     Return brand data excluding relations.
