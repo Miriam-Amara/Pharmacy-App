@@ -36,7 +36,7 @@ def login():
         key=cookie_name,
         value=session_id,
         max_age=3600,
-        secure=True,
+        secure=False,
         httponly=True
     )
     return response, 201
