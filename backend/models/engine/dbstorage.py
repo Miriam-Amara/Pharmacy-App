@@ -7,6 +7,7 @@ Database storage engine for managing all model interactions.
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine, select, func, Select
 from typing import Any, Sequence, Type, TypeVar, Tuple
+import logging
 
 from models.basemodel import Base, BaseModel
 from models.brand import Brand, brand_products
@@ -20,6 +21,7 @@ from models.sale import Sale
 from models.stock_level import StockLevel
 
 
+logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=BaseModel)
 
 
@@ -89,7 +91,7 @@ class DBStorage:
 
     def get_obj_by_id(self, cls: Type[T], id: str) -> T | None:
         """Fetches a single object by its ID."""
-        if cls in self.__classes:
+        if issubclass(cls, BaseModel):  # type: ignore
             obj = self.__session.get(cls, id)
             return obj
 
@@ -99,7 +101,6 @@ class DBStorage:
 
     def reload(self):
         """Creates all tables and initializes a scoped session."""
-        # Base.metadata.drop_all(self.__engine)
         Base.metadata.create_all(self.__engine)
         self.__session = scoped_session(
             sessionmaker(bind=self.__engine, expire_on_commit=False)
@@ -109,12 +110,15 @@ class DBStorage:
         """Commits all pending changes to the database."""
         try:
             self.__session.commit()
-        except Exception:
-            self.__session.rollback()
-            raise
+        except Exception as e:
+            try:
+                self.__session.rollback()
+            except Exception as rollback_error:
+                logger.critical(f"Rollback failed: {rollback_error}")
+            raise e
 
     def search_employee_by_email_username(
-        self, email: str | None, username: str | None
+        self, email: str | None=None, username: str | None=None
     ) -> Employee | None:
         """Finds an employee by email or username."""
         if not email and not username:
