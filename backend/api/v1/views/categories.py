@@ -6,6 +6,7 @@ Defines routes for category management operations.
 
 from flask import abort, jsonify, g
 from typing import Any
+import logging
 
 from api.v1.auth.authorization import admin_only
 from api.v1.views import app_views
@@ -19,23 +20,17 @@ from models import storage
 from models.category import Category
 
 
+logger = logging.getLogger(__name__)
+
 def get_category_dict(category: Category) -> dict[str, Any]:
     """
     Converts a Category object to a dictionary
     excluding related fields.
     """
-    category_dict: dict[str, Any] = {}
-    category_to_dict = category.to_dict()
-    excluded_attr = [
-        "products",
-    ]
-    for attr, value in category_to_dict.items():
-        if attr in excluded_attr:
-            continue
-        if attr == "added_by":
-            category_dict[attr] = value.username
-        else:
-            category_dict[attr] = value
+    
+    category_dict = category.to_dict()
+    category_dict["added_by"] = getattr(category.added_by, "username", None)
+
     return category_dict
 
 
@@ -54,6 +49,7 @@ def register_category():
     valid_data["employee_id"] = admin.id
 
     category = Category(**valid_data)
+    category.added_by = admin
     db = DatabaseOp()
     db.save(category)
 
