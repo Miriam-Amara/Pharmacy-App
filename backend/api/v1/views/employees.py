@@ -5,6 +5,7 @@ Defines routes for employee registration and management.
 """
 
 from flask import abort, jsonify
+import logging
 
 from api.v1.auth.authorization import admin_only
 from api.v1.views import app_views
@@ -13,10 +14,14 @@ from api.v1.utils.request_data_validation import (
     EmployeeUpdate,
     validate_request_data,
 )
-from api.v1.utils.utility import DatabaseOp, get_obj
+from api.v1.utils.utility import (
+    DatabaseOp, get_obj, check_email_username_exists
+)
 from models import storage
 from models.employee import Employee
 
+
+logger = logging.getLogger(__name__)
 
 @app_views.route("/register", strict_slashes=False, methods=["POST"])
 def register_employee():
@@ -24,8 +29,10 @@ def register_employee():
     Registers a new employee.
     """
     from api.v1.app import bcrypt
-
     valid_data = validate_request_data(EmployeeRegister)
+    
+    check_email_username_exists(valid_data)
+
     valid_data["password"] = bcrypt.generate_password_hash(  # type: ignore
         valid_data["password"]
     ).decode("utf-8")
@@ -35,7 +42,6 @@ def register_employee():
     db.save(employee)
 
     employee_dict = employee.to_dict()
-    employee_dict.pop("employee_session", None)
     return jsonify(employee_dict), 201
 
 
@@ -55,7 +61,7 @@ def get_all_employees(page_size: int, page_num: int):
 
     all_employees = [
         employee.to_dict() for employee in employees_objects
-    ]  # pop employee_session
+    ]
     return jsonify(all_employees), 200
 
 
@@ -72,7 +78,6 @@ def get_employee(employee_id: str):
     if not employee:
         abort(404, description="User does not exist")
     employee_dict = employee.to_dict()
-    employee_dict.pop("employee_session", None)
     return jsonify(employee_dict), 200
 
 
@@ -98,7 +103,6 @@ def update_employee(employee_id: str):
     db.save(employee)
 
     employee_dict = employee.to_dict()
-    employee_dict.pop("employee_session", None)
     return jsonify(employee_dict), 200
 
 
