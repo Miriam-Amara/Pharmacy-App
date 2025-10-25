@@ -7,16 +7,34 @@ Utility functions and database helpers.
 from flask import abort
 from psycopg2.errors import UniqueViolation
 from sqlalchemy.exc import IntegrityError
-from typing import Type, TypeVar
+from typing import Type, TypeVar, Any
 import logging
 
 from models import storage
 from models.basemodel import BaseModel
+from models.employee import Employee
 
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=BaseModel)
 
+
+def check_email_username_exists(data: dict[str, Any]) -> None:
+    """
+    """
+    if "email" in data:
+        employee = Employee.search_employee_by_email_username(
+            data["email"]
+        )
+        if employee:
+            abort(409, description="Email already exist.")
+    
+    if "username" in data:
+        employee = Employee.search_employee_by_email_username(
+            data["username"]
+        )
+        if employee:
+            abort(409, description="Username already exists.")
 
 def get_obj(cls: Type[T], id: str) -> T | None:
     """
@@ -24,11 +42,9 @@ def get_obj(cls: Type[T], id: str) -> T | None:
     """
 
     if not issubclass(cls, BaseModel):  # type: ignore
-        logger.error("Invalid class")
-        abort(400)
+        abort(400, description="Invalid class")
     if not isinstance(id, str):  # type: ignore
-        logger.error("id must be a valid string")
-        abort(400)
+        abort(400, description="id must be a valid string.")
 
     obj = storage.get_obj_by_id(cls, id)
     return obj
