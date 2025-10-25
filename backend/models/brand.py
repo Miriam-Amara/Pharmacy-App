@@ -33,12 +33,11 @@ class Brand(BaseModel, Base):
 
     __tablename__ = "brands"
 
-    name = mapped_column(String(200), nullable=False)
+    name = mapped_column(String(200), nullable=False, unique=True)
     is_active = mapped_column(Boolean, default=True)
     employee_id = mapped_column(
         String(36),
-        ForeignKey("employees.id", ondelete="SET NULL"),
-        nullable=False,
+        ForeignKey("employees.id", ondelete="SET NULL")
     )
     added_by = relationship("Employee", backref="brands")
     products = relationship(
