@@ -70,6 +70,9 @@ class BaseModel:
     def to_dict(self) -> dict[str, Any]:
         """Return dict version of the object."""
         obj_dict = deepcopy(self.__dict__)
+
+        obj_dict["created_at"] = obj_dict["created_at"].isoformat()
+        obj_dict["last_updated"] = obj_dict["last_updated"].isoformat()
         obj_dict.pop("password", None)
         obj_dict.pop("_sa_instance_state", None)
         obj_dict["__class__"] = self.__class__.__name__
