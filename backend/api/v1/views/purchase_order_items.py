@@ -6,6 +6,7 @@ Routes for managing purchase order items.
 
 from flask import abort, jsonify
 from typing import Any
+import logging
 
 from api.v1.auth.authorization import admin_only
 from api.v1.views import app_views
@@ -16,24 +17,20 @@ from api.v1.utils.request_data_validation import (
 )
 from api.v1.utils.utility import DatabaseOp, get_obj
 from models import storage
+from models.product import Product
 from models.purchase_order import PurchaseOrder
 from models.purchase_order_item import PurchaseOrderItem
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_order_item_dict(order_item: PurchaseOrderItem) -> dict[str, Any]:
     """
     Return purchase order item data excluding relations.
     """
-    order_item_dict: dict[str, Any] = {}
-    order_item_to_dict = order_item.to_dict()
-    excluded_attr = ["purchase_order"]
-    for attr, value in order_item_to_dict.items():
-        if attr in excluded_attr:
-            continue
-        if attr == "product":
-            order_item_dict[attr] = value.name
-        else:
-            order_item_dict[attr] = value
+    order_item_dict = order_item.to_dict()
+    order_item_dict["product"] = getattr(order_item.product, "name", None)
     return order_item_dict
 
 
@@ -48,12 +45,16 @@ def add_purchase_item(purchase_order_id: str):
     Add a new purchase order item.
     """
     valid_data = validate_request_data(PurchaseOrderItemRegister)
+    
+    product = get_obj(Product, valid_data["product_id"])
+    if not product:
+        abort(404, description="Product does not exist.")
 
     purchase_order = get_obj(PurchaseOrder, purchase_order_id)
     if not purchase_order:
         abort(404, description="Order does not exist")
 
-    valid_data["purchase_order_id"] = purchase_order
+    valid_data["purchase_order_id"] = purchase_order.id
     purchase_order_item = PurchaseOrderItem(**valid_data)
 
     db = DatabaseOp()
@@ -83,18 +84,22 @@ def get_all_purchases(page_size: int, page_num: int):
 
 
 @app_views.route(
-    "purchase_orderpurchase_order_items/<purchase_order_item_id>",
+    "/purchase_orders/<order_id>/purchase_order_items/<order_item_id>",
     strict_slashes=False,
     methods=["GET"],
 )
 @admin_only
-def get_purchase_item(purchase_order_item_id: str):
+def get_purchase_item(order_id: str, order_item_id: str):
     """
     Get a single purchase order item by ID.
     """
-    purchase_item = get_obj(PurchaseOrderItem, purchase_order_item_id)
+    purchase_order = get_obj(PurchaseOrder, order_id)
+    if not purchase_order:
+        abort(404, description="Order does not exist.")
+
+    purchase_item = get_obj(PurchaseOrderItem, order_item_id)
     if not purchase_item:
-        abort(404, description="Item does not exist")
+        abort(404, description="Item does not exist.")
 
     item_dict = get_order_item_dict(purchase_item)
     return jsonify(item_dict), 200
@@ -112,13 +117,18 @@ def update_purchase_order_item(order_id: str, order_item_id: str):
     """
     valid_data = validate_request_data(PurchaseOrderItemUpdate)
 
+    if "product_id" in valid_data:
+        product = get_obj(Product, valid_data["product_id"])
+        if not product:
+            abort(404, description="Product does not exist.")
+
     purchase_order = get_obj(PurchaseOrder, order_id)
     if not purchase_order:
-        abort(404, description="Order does not exist")
+        abort(404, description="Order does not exist.")
 
     order_item = get_obj(PurchaseOrderItem, order_item_id)
     if not order_item:
-        abort(404, description="Item does not exist")
+        abort(404, description="Item does not exist.")
 
     for attr, value in valid_data.items():
         setattr(order_item, attr, value)
@@ -142,11 +152,11 @@ def delete_purchase_order_item(order_id: str, order_item_id: str):
     """
     purchase_order = get_obj(PurchaseOrder, order_id)
     if not purchase_order:
-        abort(404, description="Order does not exist")
+        abort(404, description="Order does not exist.")
 
     order_item = get_obj(PurchaseOrderItem, order_item_id)
     if not order_item:
-        abort(404, description="Item does not exist")
+        abort(404, description="Item does not exist.")
 
     db = DatabaseOp()
     db.delete(order_item)
