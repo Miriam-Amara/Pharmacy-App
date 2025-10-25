@@ -6,6 +6,7 @@ Handles CRUD operations for sales via API routes.
 
 from flask import abort, jsonify, g
 from typing import Any
+import logging
 
 from api.v1.auth.authorization import admin_only
 from api.v1.views import app_views
@@ -16,24 +17,22 @@ from api.v1.utils.request_data_validation import (
 )
 from api.v1.utils.utility import DatabaseOp, get_obj
 from models import storage
+from models.brand import Brand
+from models.product import Product
 from models.sale import Sale
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_sale_dict(sale: Sale) -> dict[str, Any]:
     """
     Returns a serialized dictionary for a sale with readable fields.
     """
-    sale_dict: dict[str, Any] = {}
-    sale_to_dict = sale.to_dict()
-    for attr, value in sale_to_dict.items():
-        if attr == "product":
-            sale_dict[attr] = value.name
-        elif attr == "brand":
-            sale_dict[attr] = value.name
-        elif attr == "added_by":
-            sale_dict[attr] = value.username
-        else:
-            sale_dict[attr] = value
+    sale_dict = sale.to_dict()
+    sale_dict["product"] = getattr(sale.product, "name", None)
+    sale_dict["brand"] = getattr(sale.brand, "name", None)
+    sale_dict["added_by"] = getattr(sale.added_by, "username")
     return sale_dict
 
 
@@ -46,8 +45,15 @@ def add_sale_item():
     admin = g.current_employee
 
     valid_data = validate_request_data(SaleRegister)
-    valid_data["added_by"] = admin.id
+    brand = get_obj(Brand, valid_data["brand_id"])
+    product = get_obj(Product, valid_data["product_id"])
 
+    if not brand:
+        abort(404, description="Brand does not exist.")
+    if not product:
+        abort(404, description="Product does not exist.")
+
+    valid_data["employee_id"] = admin.id
     sale = Sale(**valid_data)
     db = DatabaseOp()
     db.save(sale)
@@ -106,6 +112,15 @@ def update_sale_item(sale_id: str):
     Updates an existing sale record.
     """
     valid_data = validate_request_data(SaleUpdate)
+
+    if "brand_id" in valid_data:
+        brand = get_obj(Brand, valid_data["brand_id"])
+        if not brand:
+            abort(404, description="Brand does not exist.")
+    if "product_id" in valid_data:
+        product = get_obj(Product, valid_data["product_id"])
+        if not product:
+            abort(404, description="Product does not exist.")
 
     sale = get_obj(Sale, sale_id)
     if not sale:
