@@ -118,7 +118,7 @@ class DBStorage:
             raise e
 
     def search_employee_by_email_username(
-        self, email: str | None=None, username: str | None=None
+        self, email: str | None = None, username: str | None = None
     ) -> Employee | None:
         """Finds an employee by email or username."""
         if not email and not username:
