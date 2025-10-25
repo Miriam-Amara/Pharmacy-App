@@ -16,7 +16,7 @@ class Product(BaseModel, Base):
 
     __tablename__ = "products"
 
-    name = mapped_column(String(500), nullable=False)
+    name = mapped_column(String(500), nullable=False, unique=True)
     selling_price = mapped_column(Float, default=0.00)
     category_id = mapped_column(
         String(36),
@@ -24,7 +24,7 @@ class Product(BaseModel, Base):
     )
     employee_id = mapped_column(
         String(36),
-        ForeignKey("employees.id", ondelete="SET NULL"),
+        ForeignKey("employees.id", ondelete="SET NULL")
     )
     category = relationship("Category", back_populates="products")
     brands = relationship(
