@@ -35,7 +35,7 @@ class PurchaseOrder(BaseModel, Base):
     )
     employee_id = mapped_column(
         String(36),
-        ForeignKey("employees.id", ondelete="SET NULL"),
+        ForeignKey("employees.id", ondelete="SET NULL")
     )
 
     purchase_order_items = relationship(
