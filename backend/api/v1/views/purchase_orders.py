@@ -6,6 +6,7 @@ Routes for managing purchase orders.
 
 from flask import abort, jsonify, g
 from typing import Any
+import logging
 
 from api.v1.auth.authorization import admin_only
 from api.v1.views import app_views
@@ -16,39 +17,23 @@ from api.v1.utils.request_data_validation import (
 )
 from api.v1.utils.utility import DatabaseOp, get_obj
 from models import storage
+from models.brand import Brand
 from models.purchase_order import PurchaseOrder
-from models.purchase_order_item import PurchaseOrderItem
 
 
-def get_purchase_order_items(order_item: PurchaseOrderItem) -> dict[str, Any]:
-    """
-    Return a purchase order item as a dictionary.
-    """
-    order_item_dict: dict[str, Any] = {}
-    order_item_to_dict: dict[str, Any] = order_item.to_dict()
-    for attr, value in order_item_to_dict.items():
-        if attr == "purchase_order":
-            continue
-        if attr == "product":
-            order_item_dict[attr] = value.name
-        else:
-            order_item_dict[attr] = value
-    return order_item_dict
+logger = logging.getLogger(__name__)
 
 
 def get_purchase_order_dict(purchase_order: PurchaseOrder) -> dict[str, Any]:
     """
     Return a purchase order as a dictionary excluding related items.
     """
-    purchase_order_dict = purchase_order.to_dict()
-    for attr, value in purchase_order_dict.items():
-        if attr == "brand":
-            purchase_order_dict[attr] = value.name
-        if attr == "added_by":
-            purchase_order_dict[attr] = value.username
-        if attr == "purchase_order_items":
-            continue
-    return purchase_order_dict
+    order_dict = purchase_order.to_dict()
+    order_dict["brand"] = getattr(purchase_order.brand, "name", None)
+    order_dict["added_by"] = getattr(
+        purchase_order.added_by, "username", None
+    )
+    return order_dict
 
 
 @app_views.route("/purchase_orders", strict_slashes=False, methods=["POST"])
@@ -58,10 +43,16 @@ def register_purchase_order():
     Register a new purchase order.
     """
     admin = g.current_employee
-    valid_data = validate_request_data(PurchaseOrderRegister)
-    valid_data["employee_id"] = admin.id
 
+    valid_data = validate_request_data(PurchaseOrderRegister)
+    brand_id = valid_data["brand_id"]
+    brand = get_obj(Brand, brand_id)
+    if not brand:
+        abort(404, description="Brand does not exist.")
+
+    valid_data["employee_id"] = admin.id
     purchase_order = PurchaseOrder(**valid_data)
+
     db = DatabaseOp()
     db.save(purchase_order)
 
@@ -105,12 +96,6 @@ def get_purchase_order(purchase_order_id: str):
         abort(404, description="Order does not exist")
 
     purchase_order_dict = get_purchase_order_dict(purchase_order)
-    purchase_order_items: list[dict[str, Any]] = []
-    for order_item in purchase_order.purchase_order_items:
-        order_item = get_purchase_order_items(order_item)
-        purchase_order_items.append(order_item)
-
-    purchase_order_dict.update({"order_items": purchase_order_items})
     return jsonify(purchase_order_dict), 200
 
 
@@ -125,6 +110,11 @@ def update_purchase_order(purchase_order_id: str):
     Update an existing purchase order.
     """
     valid_data = validate_request_data(PurchaseOrderUpdate)
+    if "brand_id" in valid_data:
+        brand = get_obj(Brand, valid_data["brand_id"])
+        if not brand:
+            abort(404, description="Brand does not exist.")
+
     purchase_order = get_obj(PurchaseOrder, purchase_order_id)
     if not purchase_order:
         abort(404, description="Purchase_order does not exist")
