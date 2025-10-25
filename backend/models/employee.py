@@ -34,8 +34,8 @@ class Employee(BaseModel, Base):
     @classmethod
     def search_employee_by_email_username(
         cls,
-        email: str | None,
-        username: str | None
+        email: str | None=None,
+        username: str | None=None
     ):
         """Find an employee by email or username."""
         from models import storage
