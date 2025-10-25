@@ -62,12 +62,9 @@ class TestBrand(unittest.TestCase):
         session_cookie = response.headers.get("Set-Cookie")
         if session_cookie:
             cookie_name, session_id = (
-                session_cookie
-                .split(";", 1)[0]
-                .split("=", 1)
+                session_cookie.split(";", 1)[0].split("=", 1)
             )
             cls.client.set_cookie(cookie_name, session_id)
-
 
     def setUp(self) -> None:
         """
@@ -96,7 +93,7 @@ class TestBrand(unittest.TestCase):
                 json=brand_data,
             )
             self.brand_ids.append(response.get_json().get("id"))
-        
+
         for product_data in self.products:
             response = self.client.post(
                 "/api/v1/products",
@@ -104,7 +101,6 @@ class TestBrand(unittest.TestCase):
             )
             self.product_ids.append(response.get_json().get("id"))
 
-        
     def tearDown(self) -> None:
         """
         Deletes the brands and products created for each test.
@@ -114,15 +110,16 @@ class TestBrand(unittest.TestCase):
             if not brand:
                 raise ValueError("Brand not found")
             storage.delete(brand)
-        
+
         for product_id in self.product_ids:
-            product: Product | None = storage.get_obj_by_id(Product, product_id)
+            product: Product | None = storage.get_obj_by_id(
+                Product, product_id
+            )
             if not product:
                 raise ValueError("Product not found")
             storage.delete(product)
 
         storage.save()
-
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -138,28 +135,25 @@ class TestBrand(unittest.TestCase):
             raise ValueError("employee not found")
         employee.delete()
         db.commit()
-    
 
     def test_add_product_brands(self):
-        """
-        """
+        """ """
         for product_id in self.product_ids:
             for brand_id in self.brand_ids:
                 response = self.client.post(
                     f"/api/v1/products/{product_id}/brands/{brand_id}"
                 )
                 self.assertEqual(response.status_code, 201)
-    
+
     def test_get_product_brands(self):
-        """
-        """
+        """ """
         # add product brands
         for product_id in self.product_ids:
             for brand_id in self.brand_ids:
                 self.client.post(
                     f"/api/v1/products/{product_id}/brands/{brand_id}"
                 )
-        
+
         # get product brands
         response = self.client.get(
             f"/api/v1/products/{self.product_ids[0]}/brands"
@@ -172,17 +166,16 @@ class TestBrand(unittest.TestCase):
         product_brands = response.get_json().get("brands")
         for brand in self.brands:
             self.assertIn(brand["name"].lower(), product_brands)
-    
+
     def test_get_brand_products(self):
-        """
-        """
+        """ """
         # add product brands
         for product_id in self.product_ids:
             for brand_id in self.brand_ids:
                 self.client.post(
                     f"/api/v1/products/{product_id}/brands/{brand_id}"
                 )
-        
+
         # get a brand products
         response = self.client.get(
             f"/api/v1/brands/{self.brand_ids[0]}/products"
@@ -197,25 +190,27 @@ class TestBrand(unittest.TestCase):
             self.assertIn(product["name"].lower(), brand_products)
 
     def test_delete_product_brand(self):
-        """
-        """
+        """ """
         # add product brands
         for product_id in self.product_ids:
             for brand_id in self.brand_ids:
                 self.client.post(
                     f"/api/v1/products/{product_id}/brands/{brand_id}"
                 )
-        
+
         for brand_id in self.brand_ids:
             response = self.client.delete(
                 f"/api/v1/products/{self.product_ids[0]}/brands/{brand_id}"
             )
             self.assertEqual(response.status_code, 200)
 
-        product: Product | None = storage.get_obj_by_id(Product, self.product_ids[0])
+        product: Product | None = storage.get_obj_by_id(
+            Product, self.product_ids[0]
+        )
         if not product:
             raise ValueError("Product not found")
         self.assertEqual([], product.brands)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

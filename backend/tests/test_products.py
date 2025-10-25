@@ -62,9 +62,7 @@ class TestProduct(unittest.TestCase):
         session_cookie = response.headers.get("Set-Cookie")
         if session_cookie:
             cookie_name, session_id = (
-                session_cookie
-                .split(";", 1)[0]
-                .split("=", 1)
+                session_cookie.split(";", 1)[0].split("=", 1)
             )
             cls.client.set_cookie(cookie_name, session_id)
 
@@ -103,11 +101,11 @@ class TestProduct(unittest.TestCase):
         product = get_obj(Product, self.product_id)
         if not product:
             raise ValueError("Product not found")
-        
+
         category = get_obj(Category, self.category_id)
         if not category:
             raise ValueError("Category not found")
-        
+
         product.delete()
         category.delete()
         db.commit()
@@ -140,7 +138,7 @@ class TestProduct(unittest.TestCase):
         )
         self.assertEqual(
             self.employee_data["username"].lower(),
-            self.response.get_json().get("added_by")
+            self.response.get_json().get("added_by"),
         )
 
     def test_get_all_products(self):
@@ -169,9 +167,13 @@ class TestProduct(unittest.TestCase):
         """
         Tests updating product details.
         """
-        new_data: dict[str, Any] = {"name": "Panadol", "selling_price": 500.00}
+        new_data: dict[str, Any] = {
+            "name": "Panadol",
+            "selling_price": 500.00
+        }
         response = self.client.put(
-            f"/api/v1/products/{self.product_id}", json=new_data
+            f"/api/v1/products/{self.product_id}",
+            json=new_data
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -203,9 +205,7 @@ class TestProduct(unittest.TestCase):
         )
         product_id = register_response.get_json().get("id")
 
-        response = self.client.delete(
-            f"/api/v1/products/{product_id}"
-        )
+        response = self.client.delete(f"/api/v1/products/{product_id}")
         self.assertEqual(response.status_code, 200)
 
         product = get_obj(Product, product_id)

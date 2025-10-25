@@ -25,11 +25,15 @@ class TestPurchase_order_item(unittest.TestCase):
     """
     Tests the PurchaseOrderItem CRUD and authentication endpoints.
 
-    POST - "/api/v1/purchase_orders/<purchase_order_id>/purchase_order_items"
+    POST - "/api/v1/purchase_orders/<purchase_order_id>"
+            "/purchase_order_items"
     GET - "/api/v1/purchases/<int:page_size>/<int:page_num>"
-    GET - "/api/v1/purchase_orders/<order_id>/purchase_order_items/<order_item_id>"
-    PUT - "/api/v1/purchase_orders/<order_id>/purchase_order_items/<order_item_id>"
-    DELETE - "/api/v1/purchase_orders/<order_id>/purchase_order_items/<order_item_id>"
+    GET - "/api/v1/purchase_orders/<order_id>/"
+            "purchase_order_items/<order_item_id>"
+    PUT - "/api/v1/purchase_orders/<order_id>/"
+            "purchase_order_items/<order_item_id>"
+    DELETE - "/api/v1/purchase_orders/<order_id>/"
+            "purchase_order_items/<order_item_id>"
     """
 
     @classmethod
@@ -64,15 +68,12 @@ class TestPurchase_order_item(unittest.TestCase):
         session_cookie = response.headers.get("Set-Cookie")
         if session_cookie:
             cookie_name, session_id = (
-                session_cookie
-                .split(";", 1)[0]
-                .split("=", 1)
+                session_cookie.split(";", 1)[0].split("=", 1)
             )
             cls.client.set_cookie(cookie_name, session_id)
 
     def add_product(self) -> None:
-        """
-        """
+        """ """
         self.product_data: dict[str, Any] = {
             "name": "Paracetamol",
             "selling_price": 350,
@@ -84,40 +85,36 @@ class TestPurchase_order_item(unittest.TestCase):
         self.product_id = response.get_json().get("id")
 
     def delete_product(self) -> None:
-        """
-        """
+        """ """
         product: Product | None = storage.get_obj_by_id(
             Product, self.product_id
         )
         if not product:
             raise ValueError("Product not found")
-  
+
         storage.delete(product)
         storage.save()
 
     def add_brand(self) -> None:
-        """
-        """
+        """ """
         self.brand_data = {"name": "Emzor"}
         brand_response = self.client.post(
             "/api/v1/brands",
             json=self.brand_data,
         )
         self.brand_id: str = brand_response.get_json().get("id")
-    
+
     def delete_brand(self) -> None:
-        """
-        """
+        """ """
         brand: Brand | None = storage.get_obj_by_id(Brand, self.brand_id)
         if not brand:
             raise ValueError("Brand not found")
-        
+
         storage.delete(brand)
         storage.save()
 
     def add_purchase_order(self) -> None:
-        """
-        """
+        """ """
         self.order_data = {"brand_id": self.brand_id}
         response = self.client.post(
             "/api/v1/purchase_orders",
@@ -126,14 +123,13 @@ class TestPurchase_order_item(unittest.TestCase):
         self.order_id: str = response.get_json().get("id")
 
     def delete_purchase_order(self) -> None:
-        """
-        """
+        """ """
         order: PurchaseOrder | None = storage.get_obj_by_id(
             PurchaseOrder, self.order_id
         )
         if not order:
             raise ValueError("Order not found")
-        
+
         storage.delete(order)
         storage.save()
 
@@ -204,15 +200,15 @@ class TestPurchase_order_item(unittest.TestCase):
         )
         self.assertEqual(
             self.response.get_json().get("unit_cost_price"),
-            self.order_item_data["unit_cost_price"]
+            self.order_item_data["unit_cost_price"],
         )
         self.assertEqual(
             self.response.get_json().get("total_cost_price"),
-            self.order_item_data["total_cost_price"]
+            self.order_item_data["total_cost_price"],
         )
         self.assertEqual(
             self.response.get_json().get("payment_status"),
-            self.order_item_data["payment_status"].lower()
+            self.order_item_data["payment_status"].lower(),
         )
         self.assertEqual(
             self.response.get_json().get("product"),
@@ -221,7 +217,6 @@ class TestPurchase_order_item(unittest.TestCase):
         self.assertIn("item_status", self.response.get_json())
         self.assertEqual(len(self.response.get_json()), 12)
 
-    
     def test_get_all_purchase_order_items(self):
         """
         Tests retrieval of all purchase_order_items with pagination.
@@ -253,15 +248,15 @@ class TestPurchase_order_item(unittest.TestCase):
         )
         self.assertEqual(
             self.response.get_json().get("unit_cost_price"),
-            self.order_item_data["unit_cost_price"]
+            self.order_item_data["unit_cost_price"],
         )
         self.assertEqual(
             self.response.get_json().get("total_cost_price"),
-            self.order_item_data["total_cost_price"]
+            self.order_item_data["total_cost_price"],
         )
         self.assertEqual(
             self.response.get_json().get("payment_status"),
-            self.order_item_data["payment_status"].lower()
+            self.order_item_data["payment_status"].lower(),
         )
         self.assertEqual(
             self.response.get_json().get("product"),
@@ -276,12 +271,12 @@ class TestPurchase_order_item(unittest.TestCase):
         """
         new_data: dict[str, Any] = {
             "quantity": 4,
-            "total_cost_price": 4 * self.order_item_data["unit_cost_price"]
+            "total_cost_price": 4 * self.order_item_data["unit_cost_price"],
         }
         response = self.client.put(
             f"/api/v1/purchase_orders/{self.order_id}"
             f"/purchase_order_items/{self.order_item_id}",
-            json=new_data
+            json=new_data,
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(

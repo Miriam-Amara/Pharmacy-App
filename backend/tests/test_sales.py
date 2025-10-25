@@ -63,15 +63,12 @@ class TestSale(unittest.TestCase):
         session_cookie = response.headers.get("Set-Cookie")
         if session_cookie:
             cookie_name, session_id = (
-                session_cookie
-                .split(";", 1)[0]
-                .split("=", 1)
+                session_cookie.split(";", 1)[0].split("=", 1)
             )
             cls.client.set_cookie(cookie_name, session_id)
 
     def add_product(self) -> None:
-        """
-        """
+        """ """
         self.product_data: dict[str, Any] = {
             "name": "Paracetamol",
             "selling_price": 350,
@@ -83,37 +80,33 @@ class TestSale(unittest.TestCase):
         self.product_id = response.get_json().get("id")
 
     def delete_product(self) -> None:
-        """
-        """
+        """ """
         product: Product | None = storage.get_obj_by_id(
             Product, self.product_id
         )
         if not product:
             raise ValueError("Product not found")
-  
+
         storage.delete(product)
         storage.save()
 
     def add_brand(self) -> None:
-        """
-        """
+        """ """
         self.brand_data = {"name": "Emzor"}
         brand_response = self.client.post(
             "/api/v1/brands",
             json=self.brand_data,
         )
         self.brand_id: str = brand_response.get_json().get("id")
-    
+
     def delete_brand(self) -> None:
-        """
-        """
+        """ """
         brand: Brand | None = storage.get_obj_by_id(Brand, self.brand_id)
         if not brand:
             raise ValueError("Brand not found")
-        
+
         storage.delete(brand)
         storage.save()
-
 
     def setUp(self) -> None:
         """
@@ -124,7 +117,7 @@ class TestSale(unittest.TestCase):
 
         quantity = 50
         unit_cost = 200
-        self.sale_item_data: dict[str, Any] = {
+        self.sale_data: dict[str, Any] = {
             "brand_id": self.brand_id,
             "product_id": self.product_id,
             "quantity": quantity,
@@ -133,7 +126,7 @@ class TestSale(unittest.TestCase):
         }
         self.response = self.client.post(
             "/api/v1/sales",
-            json=self.sale_item_data,
+            json=self.sale_data,
         )
         self.sale_id = self.response.get_json().get("id")
 
@@ -175,15 +168,15 @@ class TestSale(unittest.TestCase):
         )
         self.assertEqual(
             self.response.get_json().get("quantity"),
-            self.sale_item_data["quantity"]
+            self.sale_data["quantity"]
         )
         self.assertEqual(
             self.response.get_json().get("unit_selling_price"),
-            self.sale_item_data["unit_selling_price"]
+            self.sale_data["unit_selling_price"],
         )
         self.assertEqual(
             self.response.get_json().get("total_selling_price"),
-            self.sale_item_data["total_selling_price"]
+            self.sale_data["total_selling_price"],
         )
         self.assertEqual(
             self.response.get_json().get("brand"),
@@ -195,11 +188,10 @@ class TestSale(unittest.TestCase):
         )
         self.assertEqual(
             self.response.get_json().get("added_by"),
-            self.employee_data["username"].lower()
+            self.employee_data["username"].lower(),
         )
         self.assertEqual(len(self.response.get_json()), 13)
 
-    
     def test_get_all_sales(self):
         """
         Tests retrieval of all sales with pagination.
@@ -224,15 +216,15 @@ class TestSale(unittest.TestCase):
         )
         self.assertEqual(
             self.response.get_json().get("quantity"),
-            self.sale_item_data["quantity"]
+            self.sale_data["quantity"]
         )
         self.assertEqual(
             self.response.get_json().get("unit_selling_price"),
-            self.sale_item_data["unit_selling_price"]
+            self.sale_data["unit_selling_price"],
         )
         self.assertEqual(
             self.response.get_json().get("total_selling_price"),
-            self.sale_item_data["total_selling_price"]
+            self.sale_data["total_selling_price"],
         )
         self.assertEqual(
             self.response.get_json().get("brand"),
@@ -244,7 +236,7 @@ class TestSale(unittest.TestCase):
         )
         self.assertEqual(
             self.response.get_json().get("added_by"),
-            self.employee_data["username"].lower()
+            self.employee_data["username"].lower(),
         )
         self.assertEqual(len(self.response.get_json()), 13)
 
@@ -254,11 +246,10 @@ class TestSale(unittest.TestCase):
         """
         new_data: dict[str, Any] = {
             "quantity": 4,
-            "total_selling_price": 4 * self.sale_item_data["unit_selling_price"]
+            "total_selling_price": 4 * self.sale_data["unit_selling_price"],
         }
         response = self.client.put(
-            f"/api/v1/sales/{self.sale_id}",
-            json=new_data
+            f"/api/v1/sales/{self.sale_id}", json=new_data
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -267,7 +258,7 @@ class TestSale(unittest.TestCase):
         )
         self.assertEqual(
             response.get_json().get("total_selling_price"),
-            new_data["total_selling_price"]
+            new_data["total_selling_price"],
         )
 
 

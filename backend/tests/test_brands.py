@@ -61,9 +61,7 @@ class TestBrand(unittest.TestCase):
         session_cookie = response.headers.get("Set-Cookie")
         if session_cookie:
             cookie_name, session_id = (
-                session_cookie
-                .split(";", 1)[0]
-                .split("=", 1)
+                session_cookie.split(";", 1)[0].split("=", 1)
             )
             cls.client.set_cookie(cookie_name, session_id)
 
@@ -118,7 +116,7 @@ class TestBrand(unittest.TestCase):
         self.assertIn("is_active", self.response.get_json())
         self.assertEqual(
             self.employee_data["username"].lower(),
-            self.response.get_json().get("added_by")
+            self.response.get_json().get("added_by"),
         )
 
     def test_get_all_brands(self):
@@ -133,9 +131,7 @@ class TestBrand(unittest.TestCase):
         """
         Tests retrieval of a single brand by ID.
         """
-        response = self.client.get(
-            f"/api/v1/brands/{self.brand_id}"
-        )
+        response = self.client.get(f"/api/v1/brands/{self.brand_id}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.get_json().get("name"),
@@ -148,7 +144,8 @@ class TestBrand(unittest.TestCase):
         """
         new_data: dict[str, Any] = {"name": "M&D", "is_active": False}
         response = self.client.put(
-            f"/api/v1/brands/{self.brand_id}", json=new_data
+            f"/api/v1/brands/{self.brand_id}",
+            json=new_data
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -175,9 +172,7 @@ class TestBrand(unittest.TestCase):
         )
         brand_id = register_response.get_json().get("id")
 
-        delete_response = self.client.delete(
-            f"/api/v1/brands/{brand_id}"
-        )
+        delete_response = self.client.delete(f"/api/v1/brands/{brand_id}")
         self.assertEqual(delete_response.status_code, 200)
 
         brand = get_obj(Brand, brand_id)

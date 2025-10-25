@@ -60,9 +60,7 @@ class TestEmployee(unittest.TestCase):
         session_cookie = response.headers.get("Set-Cookie")
         if session_cookie:
             cookie_name, session_id = (
-                session_cookie
-                .split(";", 1)[0]
-                .split("=", 1)
+                session_cookie.split(";", 1)[0].split("=", 1)
             )
             cls.client.set_cookie(cookie_name, session_id)
 
@@ -154,7 +152,8 @@ class TestEmployee(unittest.TestCase):
             "email": "newemail@gmail.com",
         }
         response = self.client.put(
-            f"/api/v1/employees/{self.employee_id}", json=new_data
+            f"/api/v1/employees/{self.employee_id}",
+            json=new_data
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(

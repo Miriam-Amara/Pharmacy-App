@@ -62,9 +62,7 @@ class TestOrder(unittest.TestCase):
         session_cookie = response.headers.get("Set-Cookie")
         if session_cookie:
             cookie_name, session_id = (
-                session_cookie
-                .split(";", 1)[0]
-                .split("=", 1)
+                session_cookie.split(";", 1)[0].split("=", 1)
             )
             cls.client.set_cookie(cookie_name, session_id)
 
@@ -99,7 +97,9 @@ class TestOrder(unittest.TestCase):
         db = DatabaseOp()
 
         brand: Brand | None = get_obj(Brand, self.brand_id)
-        order: PurchaseOrder | None = get_obj(PurchaseOrder, self.order_id)
+        order: PurchaseOrder | None = get_obj(
+            PurchaseOrder, self.order_id
+        )
 
         if not brand:
             raise ValueError("Brand not found.")
@@ -138,7 +138,7 @@ class TestOrder(unittest.TestCase):
         )
         self.assertEqual(
             self.response.get_json().get("added_by"),
-            self.employee_data["username"].lower()
+            self.employee_data["username"].lower(),
         )
         self.assertEqual(len(self.response.get_json()), 9)
 
@@ -189,19 +189,14 @@ class TestOrder(unittest.TestCase):
             json={"brand_id": brand_id}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.get_json().get("brand_id"),
-            brand_id
-        )
+        self.assertEqual(response.get_json().get("brand_id"), brand_id)
         self.assertEqual(
             response.get_json().get("brand"),
             brand_data["name"].lower()
         )
 
         # delete brand
-        self.client.delete(
-            f"/api/v1/brands/{brand_id}"
-        )
+        self.client.delete(f"/api/v1/brands/{brand_id}")
 
     def test_delete_order(self):
         """

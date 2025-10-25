@@ -61,9 +61,7 @@ class TestCategory(unittest.TestCase):
         session_cookie = response.headers.get("Set-Cookie")
         if session_cookie:
             cookie_name, session_id = (
-                session_cookie
-                .split(";", 1)[0]
-                .split("=", 1)
+                session_cookie.split(";", 1)[0].split("=", 1)
             )
             cls.client.set_cookie(cookie_name, session_id)
 
@@ -118,7 +116,7 @@ class TestCategory(unittest.TestCase):
         self.assertNotIn("products", self.response.get_json())
         self.assertEqual(
             self.employee_data["username"].lower(),
-            self.response.get_json().get("added_by")
+            self.response.get_json().get("added_by"),
         )
 
     def test_get_all_categories(self):
@@ -133,9 +131,7 @@ class TestCategory(unittest.TestCase):
         """
         Tests retrieval of a single category by ID.
         """
-        response = self.client.get(
-            f"/api/v1/categories/{self.category_id}"
-        )
+        response = self.client.get(f"/api/v1/categories/{self.category_id}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.get_json().get("name"),
