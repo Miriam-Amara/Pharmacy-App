@@ -21,6 +21,14 @@ LOGGING_CONFIG: dict[str, Any] = {
         }
     },
     "handlers": {
+        "models_files": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 1,
+            "filename": "logs/models.log",
+            "formatter": "standard",
+        },
         "api_files": {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "when": "midnight",
@@ -39,6 +47,10 @@ LOGGING_CONFIG: dict[str, Any] = {
         },
     },
     "loggers": {
+        "models": {
+            "handlers": ["models_files"],
+            "level": "DEBUG",
+        },
         "api": {
             "handlers": ["api_files"],
             "level": "DEBUG",
