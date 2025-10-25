@@ -6,6 +6,7 @@ Routes for managing products.
 
 from flask import abort, jsonify, g
 from typing import Any
+import logging
 
 from api.v1.auth.authorization import admin_only
 from api.v1.views import app_views
@@ -17,24 +18,20 @@ from api.v1.utils.request_data_validation import (
 from api.v1.utils.utility import DatabaseOp, get_obj
 from models import storage
 from models.product import Product
+from models.category import Category
 
+
+logger = logging.getLogger(__name__)
 
 def get_product_dict(product: Product) -> dict[str, Any]:
     """
     Return product data excluding relations.
     """
-    product_dict: dict[str, Any] = {}
-    product_to_dict = product.to_dict()
-    excluded_attr = ["brands", "sales", "purchases", "stock_levels"]
-    for attr, value in product_to_dict.items():
-        if attr in excluded_attr:
-            continue
-        if attr == "category":
-            product_dict[attr] = value.name
-        elif attr == "added_by":
-            product_dict[attr] = value.username
-        else:
-            product_dict[attr] = value
+    product_dict = product.to_dict()
+    product_dict["category"] =  getattr(product.category, "name", None)
+    product_dict["added_by"] = getattr(
+        product.added_by, "username", None
+    )
     return product_dict
 
 
@@ -52,7 +49,14 @@ def register_product():
     valid_data = validate_request_data(ProductRegister)
     valid_data["employee_id"] = admin.id
 
+    if "category_id" in valid_data:
+        category = get_obj(Category, valid_data["category_id"])
+        if not category:
+            abort(404, description="Category does not exist.")
+        valid_data["category"] = category
+
     product = Product(**valid_data)
+    product.added_by = admin
     db = DatabaseOp()
     db.save(product)
 
@@ -113,7 +117,13 @@ def update_product(product_id: str):
     product = get_obj(Product, product_id)
     if not product:
         abort(404, description="Product does not exist")
-
+    
+    if "category_id" in valid_data:
+        category = get_obj(Category, valid_data["category_id"])
+        if not category:
+            abort(404, description="Category does not exist.")
+        valid_data["category"] = category
+    
     for attr, value in valid_data.items():
         setattr(product, attr, value)
 
