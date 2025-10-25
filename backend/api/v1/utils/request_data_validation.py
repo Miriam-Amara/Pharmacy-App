@@ -35,7 +35,7 @@ class EmployeeRole(str, Enum):
     manager = "manager"
 
 
-class PurchaseOrderStatus(Enum):
+class OrderStatus(str, Enum):
     """
     Purchase order statuses.
     """
@@ -46,7 +46,7 @@ class PurchaseOrderStatus(Enum):
     cancelled = "cancelled"
 
 
-class ItemStatus(Enum):
+class ItemStatus(str, Enum):
     """
     Purchase order item statuses.
     """
@@ -56,7 +56,7 @@ class ItemStatus(Enum):
     cancelled = "cancelled"
 
 
-class PaymentStatus(Enum):
+class PaymentStatus(str, Enum):
     """
     Payment statuses.
     """
@@ -300,7 +300,7 @@ class CategoryRegister(BaseModel):
             strip_whitespace=True
         ),
     ]
-    description: Annotated[
+    description: Optional[Annotated[
         str,
         StringConstraints(
             min_length=3,
@@ -308,7 +308,7 @@ class CategoryRegister(BaseModel):
             to_lower=True,
             strip_whitespace=True
         ),
-    ]
+    ]] = None
 
 
 class CategoryUpdate(BaseModel):
@@ -355,7 +355,7 @@ class ProductRegister(BaseModel):
         ),
     ]
     selling_price: Annotated[float, PositiveFloat]
-    category_id: Annotated[
+    category_id: Optional[Annotated[
         str,
         StringConstraints(
             min_length=36,
@@ -363,7 +363,7 @@ class ProductRegister(BaseModel):
             to_lower=True,
             strip_whitespace=True
         ),
-    ]
+    ]] = None
 
 
 class ProductUpdate(BaseModel):
@@ -401,7 +401,7 @@ class PurchaseOrderRegister(BaseModel):
     Schema for purchase order creation.
     """
 
-    status: Optional[PurchaseOrderStatus] = PurchaseOrderStatus.pending
+    status: Optional[OrderStatus] = OrderStatus.pending
     brand_id: Annotated[
         str,
         StringConstraints(
@@ -418,7 +418,7 @@ class PurchaseOrderUpdate(BaseModel):
     Schema for updating purchase order.
     """
 
-    status: Optional[PurchaseOrderStatus] = PurchaseOrderStatus.pending
+    status: Optional[OrderStatus] = OrderStatus.pending
     brand_id: Optional[
         Annotated[
             str,
