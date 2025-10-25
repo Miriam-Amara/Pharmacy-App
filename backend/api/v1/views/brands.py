@@ -6,6 +6,7 @@ Defines routes for brand management operations.
 
 from flask import abort, jsonify, g
 from typing import Any
+import logging
 
 from api.v1.auth.authorization import admin_only
 from api.v1.views import app_views
@@ -19,23 +20,14 @@ from models import storage
 from models.brand import Brand
 
 
+logger = logging.getLogger(__name__)
+
 def get_brand_dict(brand: Brand) -> dict[str, Any]:
     """
     Converts a Brand object to a dictionary excluding related fields.
     """
-    brand_dict: dict[str, Any] = {}
-    brand_to_dict = brand.to_dict()
-    excluded_attr = [
-        "products", "sales", "purchase_orders",
-        "stock_levels"
-    ]
-    for attr, value in brand_to_dict.items():
-        if attr in excluded_attr:
-            continue
-        if attr == "added_by":
-            brand_dict[attr] = value.username
-        else:
-            brand_dict[attr] = value
+    brand_dict = brand.to_dict()
+    brand_dict["added_by"] = getattr(brand.added_by, "username", None)
     return brand_dict
 
 
@@ -50,6 +42,7 @@ def register_brand():
     valid_data["employee_id"] = admin.id
 
     brand = Brand(**valid_data)
+    brand.added_by = admin
     db = DatabaseOp()
     db.save(brand)
 
